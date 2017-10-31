@@ -1,0 +1,20 @@
+# set all generic and preferred .gitignore rules in the global .gitignore file
+# this file should contain only project specific files
+
+# Python
+*.egg-info
+*.egg
+*.pyc
+.cache
+build
+dist
+
+# Translations
+*.mo
+
+# Testing
+.tox
+
+# Vagrant
+.vagrant
+.bash_history
