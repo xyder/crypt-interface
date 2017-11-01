@@ -1,4 +1,6 @@
 from crypt_interface.driver_interfaces.win import constants
+from crypt_interface.driver_interfaces.win.veracrypt.constants import \
+    EncryptionAlgorithm, VolumeType
 from crypt_interface.driver_interfaces.win.veracrypt.models import \
     MountListStruct
 
@@ -17,7 +19,7 @@ class Volume(object):
         self.truecrypt_mode = False
 
     @staticmethod
-    def from_mount_list_struct(mount_list: MountListStruct, index: int):
+    def from_veracrypt_mount_list_struct(mount_list: MountListStruct, index: int):
         """ Converts an element of a MountListStruct to a Volume
 
         :param mount_list: the instance from which the element is extracted
@@ -55,12 +57,22 @@ class Volume(object):
         volume.disk_length = mount_list.diskLength[index]
 
         # get the encryption algorithm
-        # todo: change to enum
         volume.enc_algorithm = mount_list.ea[index]
 
+        # try to convert it to the EncryptionAlgorithm enum
+        try:
+            volume.enc_algorithm = EncryptionAlgorithm(volume.enc_algorithm)
+        except ValueError:
+            pass
+
         # get the volume type
-        # todo: change to enum
         volume.volume_type = mount_list.volumeType[index]
+
+        # try to convert it to the VolumeType enum
+        try:
+            volume.volume_type = VolumeType(volume.volume_type)
+        except ValueError:
+            pass
 
         # get the TrueCrypt mode
         volume.truecrypt_mode = mount_list.truecryptMode[index]
@@ -77,7 +89,7 @@ class Volume(object):
         """
         volumes = []
         for i in range(constants.MAX_VOLUMES):
-            vol = cls.from_mount_list_struct(mount_list, i)
+            vol = cls.from_veracrypt_mount_list_struct(mount_list, i)
             if vol:
                 volumes.append(vol)
 
