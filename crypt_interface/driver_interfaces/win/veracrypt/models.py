@@ -1,96 +1,85 @@
-import array
-import ctypes
+from crypt_interface.driver_interfaces import win
+from crypt_interface.driver_interfaces.win.veracrypt import constants
+from crypt_interface.driver_interfaces.win.veracrypt.driver_models import (
+    MountListStruct,)
 
-from crypt_interface.driver_interfaces.exceptions import DriverException
-from crypt_interface.driver_interfaces.win import constants
 
+class Volume(win.base_win_models.BaseVolume):
+    @staticmethod
+    def from_veracrypt_mount_list_struct(mount_list: MountListStruct,
+                                         index: int):
+        """ Converts an element of a MountListStruct to a BaseVolume
 
-class BaseStruct(ctypes.Structure):
-    """ Base Struct for all VeraCrypt Structs """
-    _base_fields = [
-        # buffer field to catch bytes when misaligned
-        ('_buffer', ctypes.c_ubyte * 10000)
-    ]
+        :param mount_list: the instance from which the element is extracted
+        :param index: the index of the element
 
-    def __repr__(self):
-        return '<{}: {}>'.format(
-            self.__class__.__name__, self.to_volume_list())
-
-    __str__ = __repr__
-
-    def __init__(self, *args, **kwargs):
-        self._processed_buffer = None
-
-        super().__init__(*args, **kwargs)
-
-    def check_excess_buffer(self):
-        """ Checks the excess buffer for stray bytes. This happens when
-        the struct is not aligned.
+        :rtype: Union[BaseVolume, None]
+        :return: the created BaseVolume instance or None if it's not mounted
         """
 
-        buffers = []
-        aux = []
-        pos = -1
+        # quit early if no volume is mounted
+        if not mount_list.wszVolume[index].value:
+            return None
 
-        # a bit more processing for debugging purposes
-        # store continuous bytes as separate (position, bytes) tuples
-        for i in range(len(self._buffer)):
-            b = self._buffer[i]
-            if b:
-                if not aux:
-                    pos = i
-                aux.append(b)
-            else:
-                if not len(aux):
-                    continue
+        # set args for a new BaseVolume instance
+        volume = Volume()
 
-                buffers.append((pos, aux))
-                aux = []
+        # since it has a volume name, it's mounted
+        volume.is_mounted = True
 
-        self._processed_buffer = {}
+        # determine the volume path
+        volume.path = mount_list.wszVolume[index].value
 
-        # convert to a nice dict
-        for i in range(len(buffers)):
-            pos = buffers[i][0]
-            buffer = array.array('B', buffers[i][1]).tostring()
-            self._processed_buffer[pos] = buffer
+        # trim the prefix from the path
+        if volume.path.startswith('\\??\\'):
+            volume.path = volume.path[4:]
 
-        if self._processed_buffer:
-            # todo: find a way to store this info safely for debugging purposes
-            raise DriverException(
-                '{}:{} Excess buffer contains data. '
-                'Struct is not aligned.'.format(
-                    self.__class__.__name__,
-                    self.check_excess_buffer.__name__))
+        # get the volume label if any
+        volume.label = mount_list.wszLabel[index].value
 
+        # get the volume id
+        volume.volume_id = bytes(
+            mount_list.volumeID[index].value, 'utf-16', 'surrogatepass')
 
-class MountListStruct(BaseStruct):
-    """ src/Common/Apidrvr.h: MOUNT_LIST_STRUCT """
+        # get the volume size
+        volume.disk_length = mount_list.diskLength[index]
 
-    _fields_ = [
-                   # bitfield of all mounted drive letters
-                   ('ulMountedDrives', ctypes.c_uint32),
+        # get the encryption algorithm
+        volume.enc_algorithm = mount_list.ea[index]
 
-                   # volume names of mounted volumes
-                   ('wszVolume', ctypes.c_wchar
-                    * constants.TC_MAX_PATH * constants.MAX_VOLUMES),
+        # try to convert it to the EncryptionAlgorithm enum
+        try:
+            volume.enc_algorithm = constants.EncryptionAlgorithm(
+                volume.enc_algorithm)
+        except ValueError:
+            pass
 
-                   # labels of mounted volumes
-                   ('wszLabel', ctypes.c_wchar
-                    * constants.VOLUME_LABEL_SIZE * constants.MAX_VOLUMES),
+        # get the volume type
+        volume.volume_type = mount_list.volumeType[index]
 
-                   # IDs of mounted volumes
-                   ('volumeID', ctypes.c_wchar
-                    * constants.VOLUME_ID_SIZE * constants.MAX_VOLUMES),
+        # try to convert it to the VolumeType enum
+        try:
+            volume.volume_type = constants.VolumeType(volume.volume_type)
+        except ValueError:
+            pass
 
-                   # disk size in bytes
-                   ('diskLength', ctypes.c_uint64 * constants.MAX_VOLUMES),
+        # get the TrueCrypt mode
+        volume.truecrypt_mode = mount_list.truecryptMode[index]
+        return volume
 
-                   # encryption algorithm
-                   ('ea', ctypes.c_int * constants.MAX_VOLUMES),
+    @classmethod
+    def mount_list_to_volume_list(cls, mount_list: MountListStruct):
+        """ Converts a MountListStruct list to a list of Volumes
 
-                   # volume type (e.g. PROP_VOL_TYPE_OUTER, etc.)
-                   ('volumeType', ctypes.c_int * constants.MAX_VOLUMES),
+        :param mount_list: the instance which will be converted
 
-                   ('truecryptMode', ctypes.c_bool * constants.MAX_VOLUMES),
-               ] + BaseStruct._base_fields
+        :rtype: List[BaseVolume]
+        :return: the list of volumes
+        """
+        volumes = []
+        for i in range(win.constants.MAX_VOLUMES):
+            vol = cls.from_veracrypt_mount_list_struct(mount_list, i)
+            if vol:
+                volumes.append(vol)
+
+        return volumes
