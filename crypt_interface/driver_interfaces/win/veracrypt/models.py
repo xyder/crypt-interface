@@ -1,3 +1,5 @@
+import sys
+
 from crypt_interface.driver_interfaces import win
 from crypt_interface.driver_interfaces.win.veracrypt import constants
 from crypt_interface.driver_interfaces.win.veracrypt.driver_models import (
@@ -80,6 +82,7 @@ class Volume(win.base_win_models.BaseVolume):
         for i in range(win.constants.MAX_VOLUMES):
             vol = cls.from_veracrypt_mount_list_struct(mount_list, i)
             if vol:
+                vol.drive_no = i
                 volumes.append(vol)
 
         return volumes

@@ -1,4 +1,5 @@
 import ctypes
+import ctypes.wintypes as wintypes
 
 from crypt_interface.driver_interfaces import win
 from crypt_interface.driver_interfaces.win import base_driver_models
@@ -34,6 +35,22 @@ class MountListStruct(base_driver_models.BaseStruct):
                    # volume type (e.g. PROP_VOL_TYPE_OUTER, etc.)
                    ('volumeType', ctypes.c_int * win.constants.MAX_VOLUMES),
 
-                   ('truecryptMode', ctypes.c_bool
+                   ('truecryptMode', wintypes.BOOL
                     * win.constants.MAX_VOLUMES),
                ] + base_driver_models.BaseStruct._base_fields
+
+
+class UnMountStruct(base_driver_models.BaseStruct):
+    """ src/Common/Apidrvr.h: UNMOUNT_STRUCT """
+
+    _fields_ = [
+        # drive letter to unmount
+        ('nDosDriveNo', ctypes.c_int),
+
+        ('ignoreOpenFiles', wintypes.BOOL),
+
+        ('HiddenVolumeProtectionTriggered', wintypes.BOOL),
+
+        # return code back from the driver
+        ('nReturnCode', ctypes.c_int),
+    ] + base_driver_models.BaseStruct._base_fields

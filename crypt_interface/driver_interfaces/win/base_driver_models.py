@@ -11,12 +11,6 @@ class BaseStruct(ctypes.Structure):
         ('_buffer', ctypes.c_ubyte * 10000)
     ]
 
-    def __repr__(self):
-        return '<{}: {}>'.format(
-            self.__class__.__name__, self.to_volume_list())
-
-    __str__ = __repr__
-
     def __init__(self, *args, **kwargs):
         self._processed_buffer = None
 

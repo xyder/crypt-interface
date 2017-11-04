@@ -6,9 +6,16 @@ class BaseCryptInterface(object):
 
         raise NotImplementedError
 
+    def dismount_volume(self, *args, **kwargs):
+        """ Dismounts a volume """
+        raise NotImplementedError
+
 
 class CryptInterface(BaseCryptInterface):
     """ Light wrapper over an interface, for dynamic switching """
+
+    def dismount_volume(self, *args, **kwargs):
+        return self.interface.dismount_volume(*args, **kwargs)
 
     def __init__(self, interface_class, *args, **kwargs):
         self.interface = interface_class(*args, **kwargs)

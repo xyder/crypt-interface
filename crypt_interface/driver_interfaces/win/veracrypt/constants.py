@@ -6,12 +6,15 @@ VERACRYPT_DRIVER_PATH = r'\\.\VeraCrypt'
 
 
 class CtlCodes(Enum):
+    TC_IOCTL_MOUNT_VOLUME = utils.vc_ctl_code(3)
+    TC_IOCTL_DISMOUNT_VOLUME = utils.vc_ctl_code(4)
+    TC_IOCTL_DISMOUNT_ALL_VOLUMES = utils.vc_ctl_code(5)
     TC_IOCTL_GET_MOUNTED_VOLUMES = utils.vc_ctl_code(6)
 
 
 class PrintableEnum(Enum):
     def __repr__(self):
-        return self.name
+        return getattr(self, '_labels', {}).get(self, self.name)
 
     __str__ = __repr__
 
@@ -30,9 +33,6 @@ class EncryptionAlgorithm(PrintableEnum):
     SERPENT_TWOFISH_AES = 10
     TWOFISH_SERPENT = 11
 
-    def __repr__(self):
-        return self.name
-
 
 class VolumeType(PrintableEnum):
     PROP_VOL_TYPE_NORMAL = 0
@@ -43,3 +43,14 @@ class VolumeType(PrintableEnum):
     PROP_VOL_TYPE_OUTER_VOL_WRITE_PREVENTED = 3
     PROP_VOL_TYPE_SYSTEM = 4
     PROP_NBR_VOLUME_TYPES = 5
+
+
+class UnMountErrors(PrintableEnum):
+    VOLUME_NOT_MOUNTED = 5
+    FILES_OPENED = 6
+
+UnMountErrors._labels = {
+        UnMountErrors.VOLUME_NOT_MOUNTED: 'Volume is not mounted.',
+        UnMountErrors.FILES_OPENED: 'Volumes contains files/folders'
+                                    ' in use by another program.',
+    }

@@ -16,8 +16,8 @@ LPSECURITY_ATTRIBUTES = wintypes.LPVOID
 INVALID_HANDLE = wintypes.HANDLE(-1)
 
 NULL = 0
-FALSE = wintypes.BOOL(0)
-TRUE = wintypes.BOOL(1)
+FALSE = wintypes.BOOL(False)
+TRUE = wintypes.BOOL(True)
 
 
 TC_MAX_PATH = 260
