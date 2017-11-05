@@ -2,6 +2,8 @@ import ctypes
 import ctypes.wintypes as wintypes
 from enum import Enum
 
+from crypt_interface.driver_interfaces import base_constants
+
 
 # CTL codes constants
 FILE_DEVICE_UNKNOWN = 0x00000022
@@ -19,8 +21,6 @@ NULL = 0
 FALSE = wintypes.BOOL(False)
 TRUE = wintypes.BOOL(True)
 
-
-TC_MAX_PATH = 260
 VOLUME_ID_SIZE = 32
 VOLUME_LABEL_SIZE = 33
 MAX_VOLUMES = 26
@@ -54,3 +54,18 @@ class FileAttributes(Enum):
     NORMAL = 0x00000080
 
 
+class WinErrorCodes(base_constants.PrintableEnum):
+    """ Source:
+        https://msdn.microsoft.com/en-us/library/windows/desktop/ms681381(v=vs.85).aspx
+    """
+
+    # cannot access the file because it is being used by another process
+    ERROR_SHARING_VIOLATION = 32
+
+    # the data passed to a system call is too small
+    ERROR_INSUFFICIENT_BUFFER = 122
+
+WinErrorCodes._labels = {
+    WinErrorCodes.ERROR_SHARING_VIOLATION: 'File is in use.',
+    WinErrorCodes.ERROR_INSUFFICIENT_BUFFER: 'Data passed is too small.'
+}

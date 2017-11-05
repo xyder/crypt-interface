@@ -6,13 +6,22 @@ class BaseCryptInterface(object):
 
         raise NotImplementedError
 
+    def mount_volume(self, *args, **kwargs):
+        """ Mounts a volume """
+
+        raise NotImplementedError
+
     def dismount_volume(self, *args, **kwargs):
         """ Dismounts a volume """
+
         raise NotImplementedError
 
 
 class CryptInterface(BaseCryptInterface):
     """ Light wrapper over an interface, for dynamic switching """
+
+    def mount_volume(self, *args, **kwargs):
+        return self.interface.mount_volume(*args, **kwargs)
 
     def dismount_volume(self, *args, **kwargs):
         return self.interface.dismount_volume(*args, **kwargs)
