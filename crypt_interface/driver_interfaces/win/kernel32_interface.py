@@ -2,7 +2,7 @@ import ctypes
 from ctypes import wintypes
 
 from crypt_interface.driver_interfaces.exceptions import DriverException
-from crypt_interface.driver_interfaces.win import constants
+from crypt_interface.driver_interfaces.win import win_constants
 
 
 def ctl_code(device_type, func, method, access):
@@ -25,7 +25,7 @@ def configure_create_file_function():
         # (in) DWORD dwShareMode
         wintypes.DWORD,
         # (in, opt) LPSECURITY_ATTRIBUTES lpSecurityAttributes
-        constants.LPSECURITY_ATTRIBUTES,
+        win_constants.LPSECURITY_ATTRIBUTES,
         # (in) DWORD dwCreationDisposition
         wintypes.DWORD,
         # (in) DWORD dwFlagsAndAttributes
@@ -53,9 +53,9 @@ def configure_deviceiocontrol_function():
         # (in) DWORD nOutBufferSize
         wintypes.DWORD,
         # (out, opt) LPDWORD lpBytesReturned
-        constants.LPDWORD,
+        win_constants.LPDWORD,
         # (in, out, opt)   LPOVERLAPPED lpOverlapped
-        constants.LPOVERLAPPED]
+        win_constants.LPOVERLAPPED]
     device_io_ctrl_func.restype = wintypes.BOOL
 
 
@@ -73,8 +73,8 @@ def create_file(filename, access, mode, creation, flags):
     """
 
     create_func = ctypes.windll.kernel32.CreateFileW
-    handle = create_func(filename, access.value, mode.value, constants.NULL,
-                         creation.value, flags, constants.NULL)
+    handle = create_func(filename, access.value, mode.value, win_constants.NULL,
+                         creation.value, flags, win_constants.NULL)
 
     return wintypes.HANDLE(handle)
 
@@ -111,7 +111,7 @@ class DeviceIoControl(object):
         if self._handle is None:
             raise DriverException('No file handle')
 
-        if self._handle.value == constants.INVALID_HANDLE.value:
+        if self._handle.value == win_constants.INVALID_HANDLE.value:
             raise DriverException(
                 'Failed to open {}. GetLastError(): {}'.format(
                     self.path, ctypes.windll.kernel32.GetLastError()))
@@ -135,9 +135,9 @@ class DeviceIoControl(object):
     def __enter__(self):
         self._handle = create_file(
             self.path,
-            constants.GenericAccessRights.READ,
-            constants.ShareMode.READ_WRITE,
-            constants.CreationDisposition.OPEN_EXISTING,
+            win_constants.GenericAccessRights.READ,
+            win_constants.ShareMode.READ_WRITE,
+            win_constants.CreationDisposition.OPEN_EXISTING,
             0)
         self._validate_handle()
         return self

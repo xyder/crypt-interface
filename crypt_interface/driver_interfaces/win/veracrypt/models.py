@@ -18,7 +18,7 @@ class Volume(win.base_win_models.BaseVolume):
 
         volume = Volume()
 
-        win.base_driver_models.Field.struct_to_object(
+        win.base_win_driver_models.Field.struct_to_object(
             volume, mount_list, index)
 
         # if path is None, the volume is not mounted
@@ -42,7 +42,7 @@ class Volume(win.base_win_models.BaseVolume):
 
         volumes = []
 
-        for i in range(win.constants.MAX_VOLUMES):
+        for i in range(win.win_constants.MAX_VOLUMES):
             vol = cls.from_veracrypt_mount_list_struct(mount_list, i)
             if vol:
                 volumes.append(vol)

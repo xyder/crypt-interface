@@ -44,7 +44,7 @@ class VeraCryptInterface(base_crypt_interface.BaseCryptInterface):
                 'DeviceIoControl call failed: {}'.format(
                     prepend_error_code_message(
                         val=ctypes.windll.kernel32.GetLastError(),
-                        enum_class=win.constants.WinErrorCodes))))
+                        enum_class=win.win_constants.WinErrorCodes))))
 
         # check for struct alignment issues
         mount_list.check_excess_buffer()
@@ -63,9 +63,9 @@ class VeraCryptInterface(base_crypt_interface.BaseCryptInterface):
         mount_buffer.VolumePassword.Text = \
             driver_models.VCCConverters.bytes_to_password_text(password)
         mount_buffer.nDosDriveNo = volume.drive_no
-        mount_buffer.bMountRemovable = win.constants.TRUE
-        mount_buffer.bMountManager = win.constants.TRUE
-        mount_buffer.bPreserveTimestamp = win.constants.TRUE
+        mount_buffer.bMountRemovable = win.win_constants.TRUE
+        mount_buffer.bMountManager = win.win_constants.TRUE
+        mount_buffer.bPreserveTimestamp = win.win_constants.TRUE
 
         p_mount_buffer = ctypes.pointer(mount_buffer)
 
@@ -82,7 +82,7 @@ class VeraCryptInterface(base_crypt_interface.BaseCryptInterface):
                 'DeviceIoControl call failed: {}'.format(
                     prepend_error_code_message(
                         val=ctypes.windll.kernel32.GetLastError(),
-                        enum_class=win.constants.WinErrorCodes))))
+                        enum_class=win.win_constants.WinErrorCodes))))
 
         # check for struct alignment issues
         mount_buffer.check_excess_buffer()
@@ -119,7 +119,7 @@ class VeraCryptInterface(base_crypt_interface.BaseCryptInterface):
                 'DeviceIoControl call failed: {}'.format(
                     prepend_error_code_message(
                         val=ctypes.windll.kernel32.GetLastError(),
-                        enum_class=win.constants.WinErrorCodes))))
+                        enum_class=win.win_constants.WinErrorCodes))))
 
         # check for struct alignment issues
         dismount_buffer.check_excess_buffer()

@@ -4,6 +4,6 @@ Initial inspiration for CreateFile and DeviceIOControl interfacing from:
 """
 
 from crypt_interface.driver_interfaces.win import (
-    constants, base_win_models, base_driver_models)
+    win_constants, base_win_models, base_win_driver_models)
 
-__all__ = [constants, base_win_models, base_driver_models]
+__all__ = [win_constants, base_win_models, base_win_driver_models]

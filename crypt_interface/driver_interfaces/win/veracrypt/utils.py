@@ -1,4 +1,4 @@
-from crypt_interface.driver_interfaces.win import constants
+from crypt_interface.driver_interfaces.win import win_constants
 from crypt_interface.driver_interfaces.win.kernel32_interface import ctl_code
 
 
@@ -13,7 +13,7 @@ def vc_ctl_code(code):
     """
 
     return ctl_code(
-        device_type=constants.FILE_DEVICE_UNKNOWN,
+        device_type=win_constants.FILE_DEVICE_UNKNOWN,
         func=0x800 + code,
-        method=constants.METHOD_BUFFERED,
-        access=constants.FILE_ANY_ACCESS)
+        method=win_constants.METHOD_BUFFERED,
+        access=win_constants.FILE_ANY_ACCESS)
